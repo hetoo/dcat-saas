@@ -26,7 +26,9 @@ class TenantInitSeeder extends Seeder
                 // 初始化租户后台信息
                 \Artisan::call('db:seed', ['--class' => \Dcat\Admin\Models\AdminTablesSeeder::class]);
                 // 初始化租户菜单
-                \Artisan::call('db:seed', ['--class' => \Database\Seeders\TenantAdminTablesSeeder::class]);
+                if (class_exists(\Database\Seeders\TenantAdminTablesSeeder::class)) {
+                    \Artisan::call('db:seed', ['--class' => \Database\Seeders\TenantAdminTablesSeeder::class]);
+                }
 
                 // $this->tenantUpdate($tenant);
             }
