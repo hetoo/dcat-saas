@@ -47,9 +47,10 @@ class SaasInitCommand extends Command
         // set admin config
         $config = app('config');
         $config->set('admin', array_merge(
-            require config_path('admin.php'), $config->get('admin', [])
+            require config_path('admin.php'),
+            $config->get('admin', [])
         ));
-        
+
         $this->call('admin:install');
         $this->initCentralAdminInfo();
         $this->call('admin:app', [
@@ -57,8 +58,9 @@ class SaasInitCommand extends Command
         ]);
         $this->initTenantAdminInfo();
 
-        // composer dump-autoload
-        // Process::run('composer dump-autoload', $this->output);
+        // copy assets for AdminTenant
+        Process::run(sprintf('mkdir -p %s && cp -r %s %s', public_path('tenancy/assets/'), public_path('vendor'), public_path('tenancy/assets/')), $this->output);
+        $this->call('saas:menu-export');
 
         $this->info("Saas init successfully");
     }
@@ -159,7 +161,7 @@ class SaasInitCommand extends Command
         $files = File::glob(database_path("migrations/*admin*"));
 
         foreach ($files as $file) {
-            File::copy($file, database_path("migrations/tenant/".basename($file)));
+            File::copy($file, database_path("migrations/tenant/" . basename($file)));
         }
     }
 
@@ -185,6 +187,10 @@ class SaasInitCommand extends Command
     public function initCentralAdminRoute()
     {
         $content = File::get($filePath = app_path('Admin/routes.php'));
+        if (str_contains($content, "use App\Admin\Controllers\HomeController;")) {
+            return;
+        }
+
         $newContent = str_replace(
             [
                 "    'namespace'  => config('admin.route.namespace'),",
@@ -242,6 +248,10 @@ class SaasInitCommand extends Command
     public function initTenantRoute()
     {
         $content = File::get($filePath = app_path('AdminTenant/routes.php'));
+        if (str_contains($content, "use App\Admin\Controllers\HomeController;")) {
+            return;
+        }
+
         $newContent = str_replace(
             [
                 "    'namespace'  => config('admin.route.namespace'),",
@@ -280,7 +290,7 @@ class SaasInitCommand extends Command
                 continue;
             }
 
-            $path = config('dcat-saas.paths.saas', base_path()).'/'.$folder->getPath();
+            $path = config('dcat-saas.paths.saas', base_path()) . '/' . $folder->getPath();
 
             $this->filesystem->makeDirectory($path, 0755, true);
             if (config('dcat-saas.stubs.gitkeep')) {
@@ -296,7 +306,7 @@ class SaasInitCommand extends Command
      */
     public function generateGitKeep($path)
     {
-        $this->filesystem->put($path.'/.gitkeep', '');
+        $this->filesystem->put($path . '/.gitkeep', '');
     }
 
     /**
@@ -331,14 +341,14 @@ class SaasInitCommand extends Command
     {
         foreach ($this->getFiles() as $stub => $file) {
 
-            $path = config('dcat-saas.paths.saas', base_path()).'/'.$file;
+            $path = config('dcat-saas.paths.saas', base_path()) . '/' . $file;
 
             if ($keys = $this->getReplaceKeys($path)) {
                 $file = $this->getReplacedContent($file, $keys);
                 $path = $this->getReplacedContent($path, $keys);
             }
 
-            if (! $this->filesystem->isDirectory($dir = dirname($path))) {
+            if (!$this->filesystem->isDirectory($dir = dirname($path))) {
                 $this->filesystem->makeDirectory($dir, 0775, true);
                 $this->removeParentDirGitKeep($dir);
             }
