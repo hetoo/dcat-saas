@@ -145,11 +145,13 @@ class SaasInitCommand extends Command
         $this->copyMigrations();
         // 11. 开启 `admin` 多后台模式
         $this->enableMultiAdmin();
+        $this->initCentralAdminRoute();
     }
 
     public function initTenantAdminInfo()
     {
         $this->initTenantAdmin();
+        $this->initTenantRoute();
     }
 
     public function copyMigrations()
@@ -180,6 +182,42 @@ class SaasInitCommand extends Command
         File::put($filePath, $newContent);
     }
 
+    public function initCentralAdminRoute()
+    {
+        $content = File::get($filePath = app_path('Admin/routes.php'));
+        $newContent = str_replace(
+            [
+                "    'namespace'  => config('admin.route.namespace'),",
+                "<?php\n\nuse Illuminate\Routing\Router;",
+                "\$router->get('/', 'HomeController@index');",
+                "use Dcat\Admin\Admin;\n\nAdmin::routes();",
+                "Route::group([",
+                "    'prefix'     => config('admin.route.prefix'),",
+                "    // 'namespace'  => config('admin.route.namespace'),",
+                "    'middleware' => config('admin.route.middleware'),",
+                "], function (Router \$router) {",
+                "    \$router->get('/', [HomeController::class, 'index']);",
+                "});\n"
+            ],
+            [
+                "    // 'namespace'  => config('admin.route.namespace'),",
+                "<?php\n\nuse App\Admin\Controllers\HomeController;\nuse Illuminate\Routing\Router;",
+                "\$router->get('/', [HomeController::class, 'index']);",
+                "use Dcat\Admin\Admin;\n\nforeach (config('tenancy.central_domains', []) as \$domain) {\n\tAdmin::routes();",
+                "    Route::group([",
+                "        'prefix'     => config('admin.route.prefix'),",
+                "        // 'namespace'  => config('admin.route.namespace'),",
+                "        'middleware' => config('admin.route.middleware'),",
+                "    ], function (Router \$router) {",
+                "        \$router->get('/', [HomeController::class, 'index']);",
+                "    });\n}\n",
+
+            ],
+            $content
+        );
+        File::put($filePath, $newContent);
+    }
+
     public function initTenantAdmin()
     {
         $content = File::get($filePath = config_path('admin-tenant.php'));
@@ -195,6 +233,25 @@ class SaasInitCommand extends Command
                 "",
                 "'middleware' => [\n\t\t\t'tenant',\n\t\t\t\Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,\n\t\t\t'web', 'admin',\n\t\t],\n",
                 "'prefix' => 'manage',",
+            ],
+            $content
+        );
+        File::put($filePath, $newContent);
+    }
+
+    public function initTenantRoute()
+    {
+        $content = File::get($filePath = app_path('AdminTenant/routes.php'));
+        $newContent = str_replace(
+            [
+                "    'namespace'  => config('admin.route.namespace'),",
+                "<?php\n\nuse Illuminate\Routing\Router;",
+                "\$router->get('/', 'HomeController@index');",
+            ],
+            [
+                "    // 'namespace'  => config('admin.route.namespace'),",
+                "<?php\n\nuse App\AdminTenant\Controllers\HomeController;\nuse Illuminate\Routing\Router;",
+                "\$router->get('/', [HomeController::class, 'index']);",
             ],
             $content
         );
