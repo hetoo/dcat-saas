@@ -1,0 +1,37 @@
+{
+    "name": "mouyong/dcat-saas",
+    "description": "DcatSaas plugin made by mouyong",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "mouyong",
+            "email": "my24251325@gmail.com",
+            "homepage": "https://github.com/mouyong",
+            "role": "Creator & Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Plugins\\DcatSaas\\": "app",
+            "Plugins\\DcatSaas\\Database\\Factories\\": "database/factories/",
+            "Plugins\\DcatSaas\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Plugins\\DcatSaas\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": ">= 8.0",
+        "stancl/tenancy": "^3.5"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Plugins\\DcatSaas\\Providers\\DcatSaasServiceProvider"
+            ],
+            "aliases": []
+        }
+    }
+}
