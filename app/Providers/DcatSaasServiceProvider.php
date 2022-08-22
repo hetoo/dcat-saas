@@ -2,6 +2,7 @@
 
 namespace Plugins\DcatSaas\Providers;
 
+use App\Providers\TenancyServiceProvider;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 class DcatSaasServiceProvider extends BaseServiceProvider
@@ -33,6 +34,10 @@ class DcatSaasServiceProvider extends BaseServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->app->register(CommandServiceProvider::class);
+        }
+
+        if (class_exists(TenancyServiceProvider::class)) {
+            $this->app->register(TenancyServiceProvider::class);
         }
     }
 

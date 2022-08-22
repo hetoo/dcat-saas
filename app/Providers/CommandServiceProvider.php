@@ -44,9 +44,14 @@ class CommandServiceProvider extends ServiceProvider
 
         $commands = [];
         foreach ((new Finder)->in($paths)->files() as $command) {
-            $commands[] = Str::before(self::class, 'Providers\\')
+            $commandClass = Str::before(self::class, 'Providers\\')
                 . 'Console\\Commands\\' . str_replace('.php', '', $command->getBasename());
+
+            if (class_exists($commandClass)) {
+                $commands[] = $commandClass;
+            }
         }
+
         $this->commands($commands);
     }
 }
