@@ -20,9 +20,51 @@ class DcatSaasServiceProvider extends BaseServiceProvider
 
         $this->loadMigrationsFrom(dirname(__DIR__, 2) . '/database/migrations');
 
+        \Route::aliasMiddleware('tenant-init', \Plugins\DcatSaas\Http\Middleware\InitializeTenancy::class);
+        \Route::aliasMiddleware('tenant-init-config', \Plugins\DcatSaas\Http\Middleware\InitializeTenancyConfig::class);
+        \Route::middlewareGroup('tenant', [
+            'tenant-init',
+            'tenant-init-config',
+        ]);
+
         $this->app->register(RouteServiceProvider::class);
 
         // Event::listen(UserCreated::class, UserCreatedListener::class);
+        
+        if ($this->app->runningInConsole()) {
+            $this->app->register(CommandServiceProvider::class);
+        }
+
+        $this->macro();
+    }
+
+    public function macro()
+    {
+        if (\request()->secure() && in_array(\request()->getHost(), config('tenancy.central_domains', []))) {
+            config([
+                'admin.https' => true
+            ]);
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
+        \Illuminate\Support\Facades\URL::macro('tenantFile', function(?string $file = '') {    
+            if (is_null($file)) {
+                return null;
+            }
+        
+            // file is the url information, which is returned directly. No tenant domain name splicing.
+            if (str_contains($file, '://')) {
+                return $file;
+            }
+            
+            $prefix = str_replace(
+                '%tenant_id%', 
+                tenant()->getKey(), 
+                config('tenancy.filesystem.url_override.public', 'public-%tenant_id%')
+            );
+        
+            return url($prefix.'/'.$file);
+        });
     }
 
     /**
@@ -32,9 +74,6 @@ class DcatSaasServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
-        if ($this->app->runningInConsole()) {
-            $this->app->register(CommandServiceProvider::class);
-        }
 
         if (class_exists(TenancyServiceProvider::class)) {
             $this->app->register(TenancyServiceProvider::class);

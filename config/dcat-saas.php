@@ -39,6 +39,7 @@ return [
         'path'         => dirname(__DIR__).'/src/Commands/stubs',
         'files'        => [
             'tenant_model'                => 'app/Models/Tenant.php',
+            'tenant_init_seeder'          => 'database/seeders/TenantInitSeeder.php',
         ],
         'gitkeep'      => true,
     ],

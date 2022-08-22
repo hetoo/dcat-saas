@@ -36,8 +36,26 @@ class SaasInitCommand extends Command
         $this->generateFolders();
         $this->generateFiles();
 
+        // 3. 执行初始化 `php artisan tenancy:install`
         $this->call('tenancy:install');
         $this->initTenancyForProject();
+
+        // 8. 执行 `admin:publish` 发布 `config/admin.php` 配置
+        $this->call('admin:publish');
+        // 9. 执行 `admin:install` 初始化
+
+        // set admin config
+        $config = app('config');
+        $config->set('admin', array_merge(
+            require config_path('admin.php'), $config->get('admin', [])
+        ));
+        
+        $this->call('admin:install');
+        $this->initCentralAdminInfo();
+        $this->call('admin:app', [
+            'name' => 'AdminTenant',
+        ]);
+        $this->initTenantAdminInfo();
 
         // composer dump-autoload
         // Process::run('composer dump-autoload', $this->output);
@@ -47,10 +65,12 @@ class SaasInitCommand extends Command
 
     public function initTenancyForProject()
     {
-        // 1. 替换 config/tenancy.php 的 tenant_model 配置
+        // 4. 生成 `Tenant` 模型，继承默认的 `Tenant` 模型，然后更新 `config/tenancy.php` 的 `tenant_model` 配置
         $this->replaceTenancyConfig();
-        // 2. 更新 app/Providers/TenancyServiceProvider.php, 允许创建租户的时候通过 DatabaseSeeder 初始化数据
+        // 5. 修改服务提供者 `app/Providers/TenancyServiceProvider.php` 增加创建租户时初始化数据的功能
         $this->replaceTenancyProvider();
+        // 6. 更新 `database/seeders/DatabaseSeeder.php`, 允许增加创建租户时的初始化逻辑
+        $this->replaceSeeder();
     }
 
     public function replaceTenancyConfig()
@@ -98,6 +118,83 @@ class SaasInitCommand extends Command
             ],
             [
                 "Jobs\SeedDatabase::class,",
+            ],
+            $content
+        );
+        File::put($filePath, $newContent);
+    }
+
+    public function replaceSeeder()
+    {
+        $content = File::get($filePath = database_path('seeders/DatabaseSeeder.php'));
+        $newContent = str_replace(
+            [
+                "// \App\Models\User::factory(10)->create();\n\n        // \App\Models\User::factory()",
+            ],
+            [
+                "// \App\Models\User::factory(10)->create();\n\n\t\t\$this->call(TenantInitSeeder::class);\n\n        // \App\Models\User::factory()",
+            ],
+            $content
+        );
+        File::put($filePath, $newContent);
+    }
+
+    public function initCentralAdminInfo()
+    {
+        // 10. 将账号、菜单等相关数据库复制一份给到 `database/migrations/tenant`
+        $this->copyMigrations();
+        // 11. 开启 `admin` 多后台模式
+        $this->enableMultiAdmin();
+    }
+
+    public function initTenantAdminInfo()
+    {
+        $this->initTenantAdmin();
+    }
+
+    public function copyMigrations()
+    {
+        $files = File::glob(database_path("migrations/*admin*"));
+
+        foreach ($files as $file) {
+            File::copy($file, database_path("migrations/tenant/".basename($file)));
+        }
+    }
+
+    public function enableMultiAdmin()
+    {
+        $content = File::get($filePath = config_path('admin.php'));
+        $newContent = str_replace(
+            [
+                "<?php\n\nreturn [\n\n    /*",
+                "Dcat Admin'",
+                "''.",
+            ],
+            [
+                "<?php\n\nreturn [\n\t'multi_app' => [\n\t\t// 与新应用的配置文件名称一致\n\t\t// 设置为true启用，false则是停用\n\t\t'admin-tenant' => true,\n\t],\n\n    /*",
+                "'.env('APP_NAME', '')",
+                "",
+            ],
+            $content
+        );
+        File::put($filePath, $newContent);
+    }
+
+    public function initTenantAdmin()
+    {
+        $content = File::get($filePath = config_path('admin-tenant.php'));
+        $newContent = str_replace(
+            [
+                "Dcat Admin'",
+                "''.",
+                "'middleware' => ['web', 'admin'],",
+                "'prefix' => 'admin-tenant',",
+            ],
+            [
+                "'.env('APP_NAME', '')",
+                "",
+                "'middleware' => [\n\t\t\t'tenant',\n\t\t\t\Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains::class,\n\t\t\t'web', 'admin',\n\t\t],\n",
+                "'prefix' => 'manage',",
             ],
             $content
         );
