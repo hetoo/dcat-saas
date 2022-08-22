@@ -60,6 +60,11 @@ class SaasInitCommand extends Command
 
         // copy assets for AdminTenant
         Process::run(sprintf('mkdir -p %s && cp -r %s %s', public_path('tenancy/assets/'), public_path('vendor'), public_path('tenancy/assets/')), $this->output);
+
+        $this->initApplication();
+        $this->initApplicationRoute();
+        $this->initApplicationTenantRoute();
+
         $this->call('saas:menu-export');
 
         $this->info("Saas init successfully");
@@ -93,7 +98,9 @@ class SaasInitCommand extends Command
                 "'localhost',\n\t\tstr_replace(['http://', 'https://'], '', trim(env('APP_URL', ''), '/')),\n    ],",
                 "'prefix' => \$prefix,",
                 "_base' => \$prefix,",
-                "'public' => '%storage_path%/app/public/',\n        ],\n\n\t\t
+                "'public' => '%storage_path%/app/public/',
+        ],
+
         /*
         * Use this to support Storage url method on local driver disks.
         * You should create a symbolic link which points to the public directory using command: artisan tenants:link
@@ -131,10 +138,16 @@ class SaasInitCommand extends Command
         $content = File::get($filePath = database_path('seeders/DatabaseSeeder.php'));
         $newContent = str_replace(
             [
-                "// \App\Models\User::factory(10)->create();\n\n        // \App\Models\User::factory()",
+                "// \App\Models\User::factory(10)->create();
+
+        // \App\Models\User::factory()",
             ],
             [
-                "// \App\Models\User::factory(10)->create();\n\n\t\t\$this->call(TenantInitSeeder::class);\n\n        // \App\Models\User::factory()",
+                "// \App\Models\User::factory(10)->create();
+
+        \$this->call(TenantInitSeeder::class);
+
+        // \App\Models\User::factory()",
             ],
             $content
         );
@@ -187,40 +200,52 @@ class SaasInitCommand extends Command
     public function initCentralAdminRoute()
     {
         $content = File::get($filePath = app_path('Admin/routes.php'));
-        if (str_contains($content, "use App\Admin\Controllers\HomeController;")) {
-            return;
-        }
 
         $newContent = str_replace(
             [
-                "    'namespace'  => config('admin.route.namespace'),",
                 "<?php\n\nuse Illuminate\Routing\Router;",
                 "\$router->get('/', 'HomeController@index');",
-                "use Dcat\Admin\Admin;\n\nAdmin::routes();",
-                "Route::group([",
-                "    'prefix'     => config('admin.route.prefix'),",
-                "    // 'namespace'  => config('admin.route.namespace'),",
-                "    'middleware' => config('admin.route.middleware'),",
-                "], function (Router \$router) {",
-                "    \$router->get('/', [HomeController::class, 'index']);",
-                "});\n"
             ],
             [
-                "    // 'namespace'  => config('admin.route.namespace'),",
                 "<?php\n\nuse App\Admin\Controllers\HomeController;\nuse Illuminate\Routing\Router;",
                 "\$router->get('/', [HomeController::class, 'index']);",
-                "use Dcat\Admin\Admin;\n\nforeach (config('tenancy.central_domains', []) as \$domain) {\n\tAdmin::routes();",
-                "    Route::group([",
-                "        'prefix'     => config('admin.route.prefix'),",
-                "        // 'namespace'  => config('admin.route.namespace'),",
-                "        'middleware' => config('admin.route.middleware'),",
-                "    ], function (Router \$router) {",
-                "        \$router->get('/', [HomeController::class, 'index']);",
-                "    });\n}\n",
-
             ],
             $content
         );
+
+        $newContent = str_replace([
+            "
+use Dcat\Admin\Admin;
+
+Admin::routes();
+
+Route::group([
+    'prefix'     => config('admin.route.prefix'),
+    'namespace'  => config('admin.route.namespace'),
+    'middleware' => config('admin.route.middleware'),
+], function (Router \$router) {
+
+    \$router->get('/', [HomeController::class, 'index']);
+
+});
+"
+        ], [
+            "
+use Dcat\Admin\Admin;
+
+foreach (config('tenancy.central_domains', []) as \$domain) {
+    Admin::routes();
+
+    Route::group([
+        'prefix'     => config('admin.route.prefix'),
+        // 'namespace'  => config('admin.route.namespace'),
+        'middleware' => config('admin.route.middleware'),
+    ], function (Router \$router) {
+        \$router->get('/', [HomeController::class, 'index']);
+    });
+}
+",
+        ], $newContent);
         File::put($filePath, $newContent);
     }
 
@@ -266,6 +291,103 @@ class SaasInitCommand extends Command
             $content
         );
         File::put($filePath, $newContent);
+    }
+
+    public function initApplication()
+    {
+        $content = File::get($filePath = config_path('app.php'));
+
+        $newContent = str_replace(
+            [
+                "'timezone' => 'UTC',",
+                "'locale' => 'en',",
+            ],
+            [
+                "'timezone' => 'PRC',",
+                "'locale' => 'zh_CN',",
+            ],
+            $content
+        );
+        File::put($filePath, $newContent);
+    }
+
+    public function initApplicationRoute()
+    {
+        $content = File::get($filePath = app_path('Providers/RouteServiceProvider.php'));
+
+        $newContent = str_replace(
+            [
+                "\$this->routes(function () {
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/api.php'));
+
+            Route::middleware('web')
+                ->group(base_path('routes/web.php'));
+        });",
+            ],
+            [
+                "\$this->routes(function () {
+            foreach (config('tenancy.central_domains', []) as \$domain) {
+                Route::middleware('api')
+                    ->domain(\$domain) // <- 这里
+                    ->prefix('api')
+                    ->group(base_path('routes/api.php'));
+
+                Route::middleware('web')
+                    ->domain(\$domain) // <- 这里
+                    ->group(base_path('routes/web.php'));
+            }
+        });",
+            ],
+            $content
+        );
+        File::put($filePath, $newContent);
+    }
+
+    public function initApplicationTenantRoute()
+    {
+        $content = File::get($filePath = base_path('routes/tenant.php'));
+
+        $newContent = str_replace(
+            [
+                "Route::middleware([
+    'web',
+    InitializeTenancyByDomain::class,
+    PreventAccessFromCentralDomains::class,",
+            ],
+            [
+                "Route::middleware([
+    'tenant',
+    'web',
+    // InitializeTenancyByDomain::class,
+    // PreventAccessFromCentralDomains::class,",
+            ],
+            $content
+        );
+        File::put($filePath, $newContent);
+
+        if (str_contains($newContent, 'oem-info')) {
+            return;
+        }
+
+        file_put_contents($filePath, "
+Route::middleware([
+    'tenant',
+    'api',
+])->prefix('api')->group(function () {
+    Route::get('oem-info', [Tenant\OemController::class, 'detail']);
+});
+
+Route::middleware([
+    'tenant',
+    'api',
+])->prefix('{tenant?}/api')->group(function () {
+    Route::get('/', function () {
+        return 'This is your multi-tenant application. The id of the current tenant is ' . tenant('id') . '. Request from api';
+    });
+});
+", FILE_APPEND);
     }
 
     /**
