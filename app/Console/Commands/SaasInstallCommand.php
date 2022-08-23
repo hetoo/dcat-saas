@@ -2,10 +2,12 @@
 
 namespace Plugins\DcatSaas\Console\Commands;
 
-use Plugins\DcatSaas\Support\Config\GenerateConfigReader;
-use Plugins\DcatSaas\Support\Process;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
+use Plugins\DcatSaas\Support\Process;
+use Plugins\DcatSaas\Support\Config\GenerateConfigReader;
 
 class SaasInstallCommand extends Command
 {
@@ -37,6 +39,20 @@ class SaasInstallCommand extends Command
         }
 
         $this->filesystem = $this->laravel['files'];
+
+        try {
+            DB::selectOne('select now()');
+        } catch (\Throwable $e) {
+            $this->error("连接数据库失败，请检查数据库配置");
+            $this->info('');
+            $this->error($e->getMessage());
+            return 0;
+        }
+
+        if (!Schema::hasTable('plugins')) {
+            $this->error("Base table plugins doesn't exist.");
+            return 0;
+        }
 
         $this->generateFolders();
         $this->generateFiles();
