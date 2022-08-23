@@ -53,7 +53,7 @@ class SaasInstallCommand extends Command
         $config = app('config');
         $config->set('admin', array_merge(
             require config_path('admin.php'),
-            $config->get('admin', [])
+            $config->get('admin', []) ?? []
         ));
 
         $this->call('admin:install');
