@@ -44,13 +44,6 @@ class DcatSaasServiceProvider extends BaseServiceProvider
 
     public function macro()
     {
-        if (\request()->secure() && in_array(\request()->getHost(), config('tenancy.central_domains', []))) {
-            config([
-                'admin.https' => true
-            ]);
-            \Illuminate\Support\Facades\URL::forceScheme('https');
-        }
-
         \Illuminate\Support\Facades\URL::macro('tenantFile', function (?string $file = '') {
             if (is_null($file)) {
                 return null;
@@ -78,7 +71,6 @@ class DcatSaasServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
-
         if (class_exists(TenancyServiceProvider::class)) {
             $this->app->register(TenancyServiceProvider::class);
         }

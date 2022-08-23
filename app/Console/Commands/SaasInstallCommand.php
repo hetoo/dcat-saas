@@ -67,8 +67,10 @@ class SaasInstallCommand extends Command
         Process::run(sprintf('mkdir -p %s && cp -r %s %s', public_path('tenancy/assets/'), public_path('vendor'), public_path('tenancy/assets/')), $this->output);
 
         $this->initApplication();
+        $this->initApplicationAppServiceProvider();
         $this->initApplicationRoute();
         $this->initApplicationTenantRoute();
+        $this->initApplicationGitignore();
 
         $this->call('saas:menu-export');
 
@@ -88,6 +90,7 @@ class SaasInstallCommand extends Command
     public function replaceTenancyConfig()
     {
         $content = File::get($filePath = config_path('tenancy.php'));
+
         $newContent = str_replace(
             [
                 "use Stancl\Tenancy\Database\Models\Tenant;\n\nreturn [",
@@ -126,12 +129,43 @@ class SaasInstallCommand extends Command
     public function replaceTenancyProvider()
     {
         $content = File::get($filePath = base_path('app/Providers/TenancyServiceProvider.php'));
+
         $newContent = str_replace(
             [
                 "// Jobs\SeedDatabase::class,",
+                "send(function (Events\TenantCreated \$event) {
+                    return \$event->tenant;
+                })",
+                "send(function (Events\TenantDeleted \$event) {
+                    return \$event->tenant;
+                })",
             ],
             [
                 "Jobs\SeedDatabase::class,",
+                "send(function (Events\TenantCreated \$event) {
+                    \$tenant = \$event->tenant;
+                    \$target = base_path(sprintf(\"storage/%s%s/app/public\", 
+                        config('tenancy.filesystem.suffix_base'),
+                        \$tenant->id));
+                    \$link = str_replace('%tenant_id%', \$tenant->id, config('tenancy.filesystem.url_override.public', 'public-%tenant_id%'));
+
+                    chdir(public_path());
+                    \Illuminate\Support\Facades\File::ensureDirectoryExists(dirname(\$target));
+                    \Illuminate\Support\Facades\File::link(\$target, \$link);
+                    return \$event->tenant;
+                })",
+                "send(function (Events\TenantDeleted \$event) {
+                    \$tenant = \$event->tenant;
+                    \$target = base_path(sprintf(\"storage/%s%s/app/public\", 
+                        config('tenancy.filesystem.suffix_base'),
+                        \$tenant->id));
+                    \$link = str_replace('%tenant_id%', \$tenant->id, config('tenancy.filesystem.url_override.public', 'public-%tenant_id%'));
+
+                    chdir(public_path());
+                    \Illuminate\Support\Facades\File::delete(\$link);
+                    \Illuminate\Support\Facades\File::deleteDirectory(dirname(\$target));
+                    return \$event->tenant;
+                })",
             ],
             $content
         );
@@ -141,6 +175,7 @@ class SaasInstallCommand extends Command
     public function replaceSeeder()
     {
         $content = File::get($filePath = database_path('seeders/DatabaseSeeder.php'));
+
         $newContent = str_replace(
             [
                 "// \App\Models\User::factory(10)->create();
@@ -186,6 +221,7 @@ class SaasInstallCommand extends Command
     public function enableMultiAdmin()
     {
         $content = File::get($filePath = config_path('admin.php'));
+
         $newContent = str_replace(
             [
                 "<?php\n\nreturn [\n\n    /*",
@@ -257,6 +293,7 @@ foreach (config('tenancy.central_domains', []) as \$domain) {
     public function initTenantAdmin()
     {
         $content = File::get($filePath = config_path('admin-tenant.php'));
+
         $newContent = str_replace(
             [
                 "Dcat Admin'",
@@ -278,6 +315,7 @@ foreach (config('tenancy.central_domains', []) as \$domain) {
     public function initTenantRoute()
     {
         $content = File::get($filePath = app_path('AdminTenant/routes.php'));
+
         if (str_contains($content, "use App\Admin\Controllers\HomeController;")) {
             return;
         }
@@ -310,6 +348,37 @@ foreach (config('tenancy.central_domains', []) as \$domain) {
             [
                 "'timezone' => 'PRC',",
                 "'locale' => 'zh_CN',",
+            ],
+            $content
+        );
+        File::put($filePath, $newContent);
+    }
+
+    public function initApplicationAppServiceProvider()
+    {
+        $content = File::get($filePath = app_path('Providers/AppServiceProvider.php'));
+
+        $newContent = str_replace(
+            [
+                "
+    public function register()
+    {
+        //
+    }
+",
+            ],
+            [
+                "
+    public function register()
+    {
+        if (\\request()->secure() && in_array(\\request()->getHost(), config('tenancy.central_domains', []))) {
+            config([
+                'admin.https' => true
+            ]);
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+    }
+",
             ],
             $content
         );
@@ -408,6 +477,23 @@ Route::middleware([
         //     });
         // });
         // ", FILE_APPEND);
+    }
+
+    public function initApplicationGitignore()
+    {
+        $content = File::get($filePath = base_path('.gitignore'));
+
+        if (str_contains($content, '# tenant storage')) {
+            return;
+        }
+
+        $prefix = config('tenancy.filesystem.suffix_base');
+
+        file_put_contents($filePath, "
+# tenant storage
+{$prefix}*
+public-*
+", FILE_APPEND);
     }
 
     /**
