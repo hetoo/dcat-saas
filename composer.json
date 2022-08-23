@@ -25,7 +25,8 @@
     "require": {
         "php": ">= 8.0",
         "stancl/tenancy": "^3.5",
-        "dcat/laravel-admin": "^2.0"
+        "dcat/laravel-admin": "^2.0",
+        "zhenmu/support": "dev-master"
     },
     "extra": {
         "laravel": {

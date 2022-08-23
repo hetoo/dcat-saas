@@ -4,17 +4,11 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 
-Route::middleware([
-    'tenant',
-    'api',
-])->prefix('api')->group(function () {
+Route::prefix('api')->group(function () {
     Route::get('oem-info', [Tenant\OemController::class, 'detail']);
 });
 
-Route::middleware([
-    'tenant',
-    'api',
-])->prefix('{tenant?}/api')->group(function () {
+Route::prefix('{tenant?}/api')->group(function () {
     Route::get('/', function () {
         return 'This is your multi-tenant application. The id of the current tenant is ' . tenant('id') . '. Request from api';
     });
