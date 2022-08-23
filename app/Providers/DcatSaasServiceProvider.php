@@ -29,8 +29,12 @@ class DcatSaasServiceProvider extends BaseServiceProvider
 
         $this->app->register(RouteServiceProvider::class);
 
+        if (class_exists(\App\Providers\ApplicationRouteServiceProvider::class)) {
+            $this->app->register(\App\Providers\ApplicationRouteServiceProvider::class);
+        }
+
         // Event::listen(UserCreated::class, UserCreatedListener::class);
-        
+
         if ($this->app->runningInConsole()) {
             $this->app->register(CommandServiceProvider::class);
         }
@@ -47,23 +51,23 @@ class DcatSaasServiceProvider extends BaseServiceProvider
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
 
-        \Illuminate\Support\Facades\URL::macro('tenantFile', function(?string $file = '') {    
+        \Illuminate\Support\Facades\URL::macro('tenantFile', function (?string $file = '') {
             if (is_null($file)) {
                 return null;
             }
-        
+
             // file is the url information, which is returned directly. No tenant domain name splicing.
             if (str_contains($file, '://')) {
                 return $file;
             }
-            
+
             $prefix = str_replace(
-                '%tenant_id%', 
-                tenant()->getKey(), 
+                '%tenant_id%',
+                tenant()->getKey(),
                 config('tenancy.filesystem.url_override.public', 'public-%tenant_id%')
             );
-        
-            return url($prefix.'/'.$file);
+
+            return url($prefix . '/' . $file);
         });
     }
 
@@ -88,7 +92,8 @@ class DcatSaasServiceProvider extends BaseServiceProvider
     protected function registerConfig()
     {
         $this->mergeConfigFrom(
-            dirname(__DIR__, 2) . '/config/dcat-saas.php', 'dcat-saas'
+            dirname(__DIR__, 2) . '/config/dcat-saas.php',
+            'dcat-saas'
         );
     }
 

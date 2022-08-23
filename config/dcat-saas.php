@@ -36,10 +36,13 @@ return [
     ],
 
     'stubs' => [
-        'path'         => dirname(__DIR__).'/src/Commands/stubs',
+        'path'         => dirname(__DIR__) . '/src/Commands/stubs',
         'files'        => [
             'tenant_model'                => 'app/Models/Tenant.php',
             'tenant_init_seeder'          => 'database/seeders/TenantInitSeeder.php',
+            'application_api'             => 'routes/application_api.php.example',
+            'application_web'             => 'routes/application_web.php.example',
+            'application_route_service_provider'          => 'app/Providers/ApplicationRouteServiceProvider.php',
         ],
         'gitkeep'      => true,
     ],

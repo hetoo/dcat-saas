@@ -7,11 +7,11 @@ use Plugins\DcatSaas\Support\Process;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 
-class SaasInitCommand extends Command
+class SaasInstallCommand extends Command
 {
     use Traits\StubTrait;
 
-    protected $signature = 'saas:init';
+    protected $signature = 'saas:install';
 
     protected $description = 'Init saas';
 
@@ -31,6 +31,11 @@ class SaasInitCommand extends Command
      */
     public function handle()
     {
+        $result = $this->confirm("Are your sure reset saas application?");
+        if (!$result) {
+            return 0;
+        }
+
         $this->filesystem = $this->laravel['files'];
 
         $this->generateFolders();
@@ -351,43 +356,58 @@ foreach (config('tenancy.central_domains', []) as \$domain) {
 
         $newContent = str_replace(
             [
-                "Route::middleware([
-    'web',
-    InitializeTenancyByDomain::class,
-    PreventAccessFromCentralDomains::class,",
-            ],
-            [
-                "Route::middleware([
+                "
+Route::middleware([
     'tenant',
     'web',
-    // InitializeTenancyByDomain::class,
-    // PreventAccessFromCentralDomains::class,",
+    InitializeTenancyByDomain::class,
+    PreventAccessFromCentralDomains::class,
+])->group(function () {
+    Route::get('/', function () {
+        return 'This is your multi-tenant application. The id of the current tenant is ' . tenant('id');
+    });
+});
+",
+            ],
+            [
+                "
+// Route::middleware([
+//     'tenant',
+//     'web',
+//     // InitializeTenancyByDomain::class,
+//     // PreventAccessFromCentralDomains::class,
+// ])->group(function () {
+//     Route::get('/', function () {
+//         return 'This is your multi-tenant application. The id of the current tenant is ' . tenant('id');
+//     });
+// });
+",
             ],
             $content
         );
         File::put($filePath, $newContent);
 
-        if (str_contains($newContent, 'oem-info')) {
+        if (str_contains($newContent, '// InitializeTenancyByDomain::class,')) {
             return;
         }
 
-        file_put_contents($filePath, "
-Route::middleware([
-    'tenant',
-    'api',
-])->prefix('api')->group(function () {
-    Route::get('oem-info', [Tenant\OemController::class, 'detail']);
-});
+        //         file_put_contents($filePath, "
+        // Route::middleware([
+        //     'tenant',
+        //     'api',
+        // ])->prefix('api')->group(function () {
+        //     Route::get('oem-info', [Tenant\OemController::class, 'detail']);
+        // });
 
-Route::middleware([
-    'tenant',
-    'api',
-])->prefix('{tenant?}/api')->group(function () {
-    Route::get('/', function () {
-        return 'This is your multi-tenant application. The id of the current tenant is ' . tenant('id') . '. Request from api';
-    });
-});
-", FILE_APPEND);
+        // Route::middleware([
+        //     'tenant',
+        //     'api',
+        // ])->prefix('{tenant?}/api')->group(function () {
+        //     Route::get('/', function () {
+        //         return 'This is your multi-tenant application. The id of the current tenant is ' . tenant('id') . '. Request from api';
+        //     });
+        // });
+        // ", FILE_APPEND);
     }
 
     /**
