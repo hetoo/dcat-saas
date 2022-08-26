@@ -30,6 +30,11 @@ class TenantInitSeeder extends Seeder
                     \Artisan::call('db:seed', ['--class' => \Database\Seeders\TenantAdminTablesSeeder::class]);
                 }
 
+                // 设置 admin 的密码
+                $userModel::where('username', 'admimn')->update([
+                    'password' => bcrypt('admin'),
+                ]);
+
                 // $this->tenantUpdate($tenant);
             }
         });
