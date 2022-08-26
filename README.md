@@ -12,6 +12,8 @@ This is where your description should go. Try and limit it to a paragraph or two
 You can install the package via composer:
 
 ```bash
+php artisan market:require mouyong/dcat-saas
+
 composer require mouyong/dcat-saas
 ```
 
