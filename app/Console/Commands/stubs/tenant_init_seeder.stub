@@ -32,7 +32,7 @@ class TenantInitSeeder extends Seeder
 
                 // 设置 admin 的密码
                 $userModel::where('username', 'admimn')->update([
-                    'password' => bcrypt(env('ADMIN_PASSWORD', 'admin')),
+                    'password' => bcrypt(config('app.admin_password', 'admin')),
                 ]);
 
                 // $this->tenantUpdate($tenant);
