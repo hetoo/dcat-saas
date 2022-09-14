@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Http\Controllers\Tenant;
+
+use Illuminate\Http\Request;
+use App\Utilities\AppUtility;
+use App\Models\HabitInformation;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Artisan;
+
+class GlobalController extends Controller
+{
+    public function clearCache()
+    {
+        Artisan::call('config:clear');
+        Artisan::call('view:clear');
+        Artisan::call('cache:clear');
+        
+        return $this->success();
+    }
+
+    public function upload()
+    {
+        \request()->validate([
+            'file' => ['required', 'file'],
+            'type' => ['required', 'integer'],
+        ]);
+
+        $path = match (\request('type')) {
+            default => 'unknown',
+            1 => 'unknown',
+            2 => 'files',
+            3 => 'images',
+            4 => 'videos',
+            5 => 'documents',
+        };
+
+        $cmdWordResp = \FresnsCmdWord::plugin('LaravelLocalStorage')->upload([
+            'file' => \request('file'),
+            'path' => $path,
+        ]);
+
+        return $this->success($cmdWordResp->getData());
+    }
+}
