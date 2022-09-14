@@ -44,6 +44,7 @@ return [
             'application_web'             => 'routes/application_web.php.example',
             'application_route_provider'  => 'app/Providers/ApplicationRouteServiceProvider.php',
             'oem_controller'              => 'app/Http/Controllers/Tenant/OemController.php',
+            'global_controller'              => 'app/Http/Controllers/Tenant/GlobalController.php',
         ],
         'gitkeep'      => true,
     ],
