@@ -28,7 +28,7 @@ class SaasDemoAddCommand extends Command
     public function handle()
     {
         $tenant1 = \App\Models\Tenant::create(['id' => $id = $this->argument('tenant')]);
-        $tenant1->domains()->create(['domain' => 'foo.'.str_replace(['http://', 'https://'], '', config('app.url'))]);
+        $tenant1->domains()->create(['domain' => "{$id}.".str_replace(['http://', 'https://'], '', config('app.url'))]);
 
         $this->info("{$id} 创建成功");
         return 0;
