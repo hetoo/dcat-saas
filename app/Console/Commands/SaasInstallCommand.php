@@ -114,7 +114,8 @@ class SaasInstallCommand extends Command
                 "'localhost',\n    ],",
                 "'prefix' => 'tenant',",
                 "_base' => 'tenant',",
-                "'public' => '%storage_path%/app/public/',\n        ],"
+                "// '--force' => true,",
+                "'public' => '%storage_path%/app/public/',\n        ],",
             ],
             [
                 "use Stancl\Tenancy\Database\Models\Tenant;\n\n\$prefix = env('DB_DATABASE') . '_';\n\nreturn [",
@@ -122,6 +123,7 @@ class SaasInstallCommand extends Command
                 "'localhost',\n\t\tstr_replace(['http://', 'https://'], '', trim(env('APP_URL', ''), '/')),\n    ],",
                 "'prefix' => \$prefix,",
                 "_base' => \$prefix,",
+                "'--force' => true,",
                 "'public' => '%storage_path%/app/public/',
         ],
 
