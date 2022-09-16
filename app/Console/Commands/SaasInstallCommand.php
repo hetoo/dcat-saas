@@ -523,6 +523,7 @@ Route::middleware([
         file_put_contents($filePath, "
 # tenant storage
 {$prefix}*
+!database/migrations/tenant
 public-*
 ", FILE_APPEND);
     }
