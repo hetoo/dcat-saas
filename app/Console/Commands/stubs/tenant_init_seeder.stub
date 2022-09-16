@@ -24,10 +24,10 @@ class TenantInitSeeder extends Seeder
 
             if ($userModel::count() == 0) {
                 // 初始化租户后台信息
-                \Artisan::call('db:seed', ['--class' => \Dcat\Admin\Models\AdminTablesSeeder::class]);
+                \Artisan::call('db:seed', ['--class' => \Dcat\Admin\Models\AdminTablesSeeder::class, '--force' => true]);
                 // 初始化租户菜单
                 if (class_exists(\Database\Seeders\TenantAdminTablesSeeder::class)) {
-                    \Artisan::call('db:seed', ['--class' => \Database\Seeders\TenantAdminTablesSeeder::class]);
+                    \Artisan::call('db:seed', ['--class' => \Database\Seeders\TenantAdminTablesSeeder::class, '--force' => true]);
                 }
 
                 // 设置 admin 的密码
