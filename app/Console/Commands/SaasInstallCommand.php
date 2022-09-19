@@ -84,6 +84,7 @@ class SaasInstallCommand extends Command
 
         $this->initApplication();
         $this->initApplicationAppServiceProvider();
+        $this->initApplicationRouteServiceProvider();
         $this->initApplicationRoute();
         $this->initApplicationTenantRoute();
         $this->initApplicationGitignore();
@@ -400,14 +401,14 @@ foreach (config('tenancy.central_domains', []) as \$domain) {
             \$namespace = request()->route()->getAction('namespace');
 
             if (!request('page') || request('export')) {
-                return \$this->get(request('columns', ['*']));
+                return $this->get(request('columns', ['*']));
             }
 
             if (\Illuminate\Support\Str::contains(\$namespace, 'App\Http\Controllers\Admin')) {
-                return \$this->paginate(request('per_page', 20) <= 100 ? request('per_page', 20) : 100, request('columns', ['*']));
+                return $this->paginate(request('per_page', 20) <= 100 ? request('per_page', 20) : 100, request('columns', ['*']));
             }
 
-            return \$this->paginate(request('per_page', 20) <= 100 ? request('per_page', 20) : 100, request('columns', ['*']));
+            return $this->paginate(request('per_page', 20) <= 100 ? request('per_page', 20) : 100, request('columns', ['*']));
         });
         \Illuminate\Database\Query\Builder::macro('result', \$paginate);
     }
@@ -418,7 +419,7 @@ foreach (config('tenancy.central_domains', []) as \$domain) {
         File::put($filePath, $newContent);
     }
 
-    public function initApplicationRoute()
+    public function initApplicationRouteServiceProvider()
     {
         $content = File::get($filePath = app_path('Providers/RouteServiceProvider.php'));
 
@@ -446,6 +447,27 @@ foreach (config('tenancy.central_domains', []) as \$domain) {
                     ->group(base_path('routes/web.php'));
             }
         });",
+            ],
+            $content
+        );
+        File::put($filePath, $newContent);
+    }
+
+    public function initApplicationRoute()
+    {
+        $content = File::get($filePath = base_path('routes/web.php'));
+
+        $newContent = str_replace(
+            [
+                "
+    return view('welcome');
+",
+            ],
+            [
+                "
+    return admin_redirect('/');
+    return view('welcome');
+",
             ],
             $content
         );
