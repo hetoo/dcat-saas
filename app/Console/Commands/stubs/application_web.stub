@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group([], function () {
     Route::get('/', function () {
-        return admin_redirect('pc');
+        return redirect('pc');
         // return 'This is your multi-tenant application. The id of the current tenant is ' . tenant('id');
     });
 });
