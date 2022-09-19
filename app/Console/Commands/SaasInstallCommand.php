@@ -108,6 +108,10 @@ class SaasInstallCommand extends Command
     {
         $content = File::get($filePath = config_path('tenancy.php'));
 
+        if (str_contains($content, "url_override")) {
+            return;
+        }
+
         $newContent = str_replace(
             [
                 "use Stancl\Tenancy\Database\Models\Tenant;\n\nreturn [",
