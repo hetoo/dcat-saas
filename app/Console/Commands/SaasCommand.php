@@ -43,12 +43,17 @@ LOGO;
     protected function listAdminCommands(): void
     {
         $commands = collect(Artisan::all())->mapWithKeys(function ($command, $key) {
-            if (Str::startsWith($key, 'saas')) {
+            if (
+                Str::startsWith($key, 'saas')
+                || Str::startsWith($key, 'tenants')
+            ) {
                 return [$key => $command];
             }
 
             return [];
         })->toArray();
+
+        \ksort($commands);
 
         $width = $this->getColumnWidth($commands);
 
