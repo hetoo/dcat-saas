@@ -550,6 +550,7 @@ Route::middleware([
 
         file_put_contents($filePath, "
 # tenant storage
+extensions/backups/
 {$prefix}*
 !database/migrations/tenant
 public-*
