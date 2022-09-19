@@ -132,7 +132,7 @@ class SaasInstallCommand extends Command
         * Use this to support Storage url method on local driver disks.
         * You should create a symbolic link which points to the public directory using command: artisan tenants:link
         * Then you can use tenant aware Storage url: Storage::disk('public')->url('file.jpg')
-        * 
+        *
         * See https://github.com/archtechx/tenancy/pull/689
         */
         'url_override' => [
