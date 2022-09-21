@@ -491,7 +491,7 @@ foreach (config('tenancy.central_domains', []) as \$domain) {
 Route::middleware('auth:sanctum')->get('/user', function (Request \$request) {
     return \$request->user();
 });
-                
+
 ",
             ],
             [
