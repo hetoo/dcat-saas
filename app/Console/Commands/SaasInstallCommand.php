@@ -85,7 +85,8 @@ class SaasInstallCommand extends Command
         $this->initApplication();
         $this->initApplicationAppServiceProvider();
         $this->initApplicationRouteServiceProvider();
-        $this->initApplicationRoute();
+        $this->initApplicationWebRoute();
+        $this->initApplicationApiRoute();
         $this->initApplicationTenantRoute();
         $this->initApplicationGitignore();
 
@@ -457,7 +458,7 @@ foreach (config('tenancy.central_domains', []) as \$domain) {
         File::put($filePath, $newContent);
     }
 
-    public function initApplicationRoute()
+    public function initApplicationWebRoute()
     {
         $content = File::get($filePath = base_path('routes/web.php'));
 
@@ -470,7 +471,53 @@ foreach (config('tenancy.central_domains', []) as \$domain) {
             [
                 "
     return admin_redirect('/');
-    return view('welcome');
+    // return view('welcome');
+",
+            ],
+            $content
+        );
+        File::put($filePath, $newContent);
+    }
+
+    public function initApplicationApiRoute()
+    {
+        $content = File::get($filePath = base_path('routes/api.php'));
+
+        $newContent = str_replace(
+            [
+                "
+*/
+
+Route::middleware('auth:sanctum')->get('/user', function (Request \$request) {
+    return \$request->user();
+});
+                
+",
+            ],
+            [
+                "
+*/
+
+Route::group([
+    'prefix' => 'admin',
+    'middleware' => ['auth:api-admin'],
+], function () {
+    Route::post('login', [LaravelJwtAuth\AdministratorAuthController::class, 'login'])->withoutMiddleware(['auth:api-admin']);
+    Route::post('logout', [LaravelJwtAuth\AdministratorAuthController::class, 'logout']);
+    Route::post('refresh', [LaravelJwtAuth\AdministratorAuthController::class, 'refresh']);
+    Route::get('me', [LaravelJwtAuth\AdministratorAuthController::class, 'me']);
+
+    Route::prefix('tenants')->group(function () {
+        Route::get('/', [Admin\TenantController::class, 'index']);
+        Route::post('/', [Admin\TenantController::class, 'store']);
+        Route::delete('/{tenantId}', [Admin\TenantController::class, 'destroy']);
+    });
+});
+
+// Route::middleware('auth:sanctum')->get('/user', function (Request \$request) {
+//     return \$request->user();
+// });
+
 ",
             ],
             $content
