@@ -1,7 +1,7 @@
 {
     "name": "mouyong/dcat-saas",
-    "description": "DcatSaas plugin made by mouyong",
-    "license": "MIT",
+    "description": "DcatSaas plugin for the laravel and dcat-saas",
+    "license": "",
     "authors": [
         {
             "name": "mouyong",
@@ -10,6 +10,14 @@
             "role": "Creator & Developer"
         }
     ],
+    "homepage": "https://laravel-workerman.iwnweb.com",
+    "support": {
+        "email": "my24251325@gmail.com",
+        "source": "https://github.com/mouyong/dcat-saas",
+        "issues": "https://laravel-workerman.iwnweb.com",
+        "forum": "https://laravel-workerman.iwnweb.com",
+        "wiki": "https://laravel-workerman.iwnweb.com"
+    },
     "autoload": {
         "psr-4": {
             "Plugins\\DcatSaas\\": "app",
