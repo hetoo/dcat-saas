@@ -1,7 +1,7 @@
 {
     "name": "mouyong/dcat-saas",
     "description": "DcatSaas plugin for the laravel and dcat-saas",
-    "license": "",
+    "license": "Apache-2",
     "authors": [
         {
             "name": "mouyong",
