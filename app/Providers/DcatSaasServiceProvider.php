@@ -72,7 +72,10 @@ class DcatSaasServiceProvider extends BaseServiceProvider
     public function register()
     {
         if (class_exists(TenancyServiceProvider::class)) {
-            $this->app->register(TenancyServiceProvider::class);
+            try {
+                $this->app->register(TenancyServiceProvider::class);
+            } catch (\Throwable $e) {
+            }
         }
     }
 
