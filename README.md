@@ -27,6 +27,16 @@
 
 ### 初始化
 
+`composer.json`
+```
+{
+	...
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+	...
+}
+```
+
 ```
 composer create-project --prefer-dist laravel/laravel saas-test
 cd saas-test
