@@ -405,7 +405,7 @@ foreach (config('tenancy.central_domains', []) as \$domain) {
         \Illuminate\Database\Eloquent\Builder::macro('result', \$paginate = function () {
             \$namespace = request()->route()->getAction('namespace');
 
-            if (!request('page') || request('export')) {
+            if (request('all') || request('export')) {
                 return \$this->get(request('columns', ['*']));
             }
 
