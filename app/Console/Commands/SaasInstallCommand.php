@@ -142,7 +142,7 @@ class SaasInstallCommand extends Command
         */
         'url_override' => [
             // The array key is local disk (must exist in root_override) and value is public directory (%tenant_id% will be replaced with actual tenant id).
-            'public' => 'public-%tenant_id%',
+            'public' => 'tenants/public-%tenant_id%',
         ],",
             ],
             $content
@@ -175,6 +175,7 @@ class SaasInstallCommand extends Command
 
                     chdir(public_path());
                     \Illuminate\Support\Facades\File::ensureDirectoryExists(dirname(\$target));
+                    \Illuminate\Support\Facades\File::ensureDirectoryExists(dirname(\$link));
                     \Illuminate\Support\Facades\File::link(\$target, \$link);
                     return \$event->tenant;
                 })",
@@ -187,7 +188,7 @@ class SaasInstallCommand extends Command
 
                     chdir(public_path());
                     \Illuminate\Support\Facades\File::delete(\$link);
-                    \Illuminate\Support\Facades\File::deleteDirectory(dirname(\$target));
+                    \Illuminate\Support\Facades\File::deleteDirectory(dirname(dirname($target)));
                     return \$event->tenant;
                 })",
             ],
