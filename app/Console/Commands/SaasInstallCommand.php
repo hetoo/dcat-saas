@@ -168,7 +168,7 @@ class SaasInstallCommand extends Command
                 "Jobs\SeedDatabase::class,",
                 "send(function (Events\TenantCreated \$event) {
                     \$tenant = \$event->tenant;
-                    \$target = base_path(sprintf(\"storage/%s%s/app/public\", 
+                    \$target = base_path(sprintf(\"storage/tenants/%s%s/app/public\", 
                         config('tenancy.filesystem.suffix_base'),
                         \$tenant->id));
                     \$link = str_replace('%tenant_id%', \$tenant->id, config('tenancy.filesystem.url_override.public', 'public-%tenant_id%'));
@@ -180,7 +180,7 @@ class SaasInstallCommand extends Command
                 })",
                 "send(function (Events\TenantDeleted \$event) {
                     \$tenant = \$event->tenant;
-                    \$target = base_path(sprintf(\"storage/%s%s/app/public\", 
+                    \$target = base_path(sprintf(\"storage/tenants/%s%s/app/public\", 
                         config('tenancy.filesystem.suffix_base'),
                         \$tenant->id));
                     \$link = str_replace('%tenant_id%', \$tenant->id, config('tenancy.filesystem.url_override.public', 'public-%tenant_id%'));
