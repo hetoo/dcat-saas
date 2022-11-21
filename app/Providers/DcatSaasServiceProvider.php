@@ -54,11 +54,14 @@ class DcatSaasServiceProvider extends BaseServiceProvider
                 return $file;
             }
 
-            $prefix = str_replace(
-                '%tenant_id%',
-                tenant()->getKey(),
-                config('tenancy.filesystem.url_override.public', 'public-%tenant_id%')
-            );
+            $prefix = 'storage';
+            if (tenant()) {
+                $prefix = str_replace(
+                    '%tenant_id%', 
+                    tenant()->getKey(), 
+                    config('tenancy.filesystem.url_override.public', 'public-%tenant_id%')
+                );
+            }
 
             return url($prefix . '/' . $file);
         });
