@@ -12,5 +12,6 @@
     "providers": [
         "Plugins\\DcatSaas\\Providers\\DcatSaasServiceProvider"
     ],
+    "autoloadFiles": [],
     "aliases": []
 }
