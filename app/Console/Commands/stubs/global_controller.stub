@@ -34,7 +34,7 @@ class GlobalController extends Controller
             'tenant_id' => ['nullable'],
         ]);
 
-        $path = match (\request('type')) {
+        $path = match (intval(\request('type'))) {
             default => 'unknown',
             1 => 'unknown',
             2 => 'reports',
@@ -49,7 +49,7 @@ class GlobalController extends Controller
         };
 
         $tenantId = \request('tenant_id');
-        if (!$tenantId) {
+        if (!$tenantId && !tenant()) {
             $path = 'public/'.$path;
         }
 
