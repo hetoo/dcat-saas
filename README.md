@@ -163,7 +163,7 @@ location ~* ^/assets {
 
 
 ## 协议
-[Apache 2.0](LICENSE)
+[Apache 2.0](https://github.com/mouyong/dcat-saas/blob/master/LICENSE)
 
 
 ## 开发者交流群
