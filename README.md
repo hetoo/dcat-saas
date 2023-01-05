@@ -1,17 +1,21 @@
-# DcatSaas extension
+# DcatSaas
 
-[![Latest Stable Version](http://poser.pugx.org/mouyong/dcat-saas/v)](https://packagist.org/packages/mouyong/dcat-saas) [![Total Downloads](http://poser.pugx.org/mouyong/dcat-saas/downloads)](https://packagist.org/packages/mouyong/dcat-saas) [![Latest Unstable Version](http://poser.pugx.org/mouyong/dcat-saas/v/unstable)](https://packagist.org/packages/mouyong/dcat-saas) [![License](http://poser.pugx.org/mouyong/dcat-saas/license)](https://packagist.org/packages/mouyong/dcat-saas) [![PHP Version Require](http://poser.pugx.org/mouyong/dcat-saas/require/php)](https://packagist.org/packages/mouyong/dcat-saas)
+[![License](http://poser.pugx.org/mouyong/dcat-saas/license)](https://packagist.org/packages/mouyong/dcat-saas)
 
 ## 介绍
 
 一款帮助你在 30 分钟内从 0 搭建 Laravel SaaS 化项目的插件。
 
-在 [fresns/plugin-manager](http://gitee.com/fresns/plugin-manager) 与 [fresns/market-manager](https://gitee.com/fresns/market-manager) 的插件架构设计下，采用 [Tenancy 3.x](https://tenancyforlaravel.com/)、[Dcat-Admin](http://www.dcatadmin.com/)、[Laravel](https://laravel.com/) 可快速建立属于你的 SaaS 业务框架。
+在`插件管理器`与`应用市场管理器`的插件架构设计下，采用`Tenancy 3.x`、`Dcat-Admin`、`Laravel` 可快速建立属于你的 SaaS 业务框架。
 
-初期可采用 [dcat-admin](https://learnku.com/docs/dcat-admin/2.x) 完成中心应用开账号，租户应用建立业务逻辑。
+初期可采用 `Dcat-Admin` 完成中心应用开账号，租户应用建立业务逻辑的方案。研发到一定阶段后，推荐采用 [scui](https://lolicode.gitee.io/scui-doc/) 或其他你喜欢的管理后台框架，将项目前后端进行分离。
 
-后期推荐采用 [scui](https://lolicode.gitee.io/scui-doc/) 将项目前后端分离化（相关模板可单独联系作者了解详情）。
-
+依赖项目：
+- [插件管理器 fresns/plugin-manager](http://gitee.com/fresns/plugin-manager)
+- [应用市场管理器 fresns/market-manager](https://gitee.com/fresns/market-manager)
+- [Tenancy 3.x](https://tenancyforlaravel.com/)
+- [Dcat-Admin](http://www.dcatadmin.com/)
+- [Laravel](https://laravel.com/)
 
 ## 前置要求
 
@@ -25,9 +29,9 @@
 
 ## 安装
 
-### 初始化
+### 修改扩展包稳定性限制
 
-`composer.json`
+`composer.json` 需要允许安装稳定性为 `dev` 的依赖包。相关设置见下方代码。
 ```
 {
     ...
@@ -37,23 +41,27 @@
 }
 ```
 
+### 初始化
 ```
+# 创建新项目 saas-test
 composer create-project --prefer-dist laravel/laravel saas-test
+# 进入项目目录
 cd saas-test
 
-初始化 git 仓库
+# 初始化 git 仓库
 git init
 git add .
 git commit -m "feat: Init."
 
+# 配置应用市场管理器与插件管理器的安装源
 composer config repositories.market-manager vcs https://gitee.com/fresns/market-manager
 composer config repositories.plugin-manager vcs https://gitee.com/fresns/plugin-manager
 
+# 安装应用市场管理器与插件管理器
 composer require fresns/market-manager:dev-master
 composer require fresns/plugin-manager:2.x-dev
 
-配置 数据库
-配置 项目信息
+# 配置数据库与项目信息
 	APP_NAME
 	APP_URL
 
@@ -62,22 +70,23 @@ composer require fresns/plugin-manager:2.x-dev
 	DB_USERNAME
 	DB_PASSWORD
 
-执行迁移，增加 plugins 表
-
+# 执行迁移，增加 plugins 表
 php artisan migrate
 
-提交仓库变动。方便查看 saas 初始化的文件
+# 提交仓库变动。方便查看 saas 初始化的文件
+git add .
+git commit -m "feat: Install market-manager and plugin-manager."
 
-从 github 下载 dcat-saas 扩展
+# 从 github 下载 dcat-saas 扩展
 php artisan market:require mouyong/dcat-saas
 
-或从 zip 压缩包安装 dcat-saas
+# 或从 zip 压缩包安装 dcat-saas
 php artisan market:require ~/dcat-saas.zip
 
-激活插件
+# 激活插件
 php artisan plugin:activate DcatSaas
 
-初始化 saas 信息
+# 初始化 saas 信息
 php artisan saas:install
 ```
 
@@ -106,7 +115,7 @@ php artisan tenants:rollback --tenants foo      # 回滚 foo 租户的迁移，�
 
 宝塔缓存与前端代理的配置示例：
 
-搭配 flow.aliyun.com，可完成项目 devops 自动化部署。
+搭配 `flow.aliyun.com` 或宝塔 `webhook` 可完成项目的 `devops` 自动化部署。
 
 ```
 # scui
@@ -154,4 +163,4 @@ location ~* ^/assets {
 
 
 ## 开发者交流群
-[插件世界技术交流群](https://qm.qq.com/cgi-bin/qm/qr?k=JdZJTPzOEsDo3gCR1ENENRXqWPmM-67l&jump_from=webapi&authKey=5EZ6xwqKptmf3U3QMT/IkclubXceZt2JWqkiQbfwXiELv2d4roHTMX32MmBWoi4q) ID: 305795002
+[技术交流群](https://qm.qq.com/cgi-bin/qm/qr?k=JdZJTPzOEsDo3gCR1ENENRXqWPmM-67l&jump_from=webapi&authKey=5EZ6xwqKptmf3U3QMT/IkclubXceZt2JWqkiQbfwXiELv2d4roHTMX32MmBWoi4q) ID: 305795002
