@@ -154,4 +154,4 @@ location ~* ^/assets {
 
 
 ## 开发者交流群
-[DcatSaas 技术交流群](https://qm.qq.com/cgi-bin/qm/qr?k=JdZJTPzOEsDo3gCR1ENENRXqWPmM-67l&jump_from=webapi&authKey=5EZ6xwqKptmf3U3QMT/IkclubXceZt2JWqkiQbfwXiELv2d4roHTMX32MmBWoi4q) ID: 305795002
+[插件世界技术交流群](https://qm.qq.com/cgi-bin/qm/qr?k=JdZJTPzOEsDo3gCR1ENENRXqWPmM-67l&jump_from=webapi&authKey=5EZ6xwqKptmf3U3QMT/IkclubXceZt2JWqkiQbfwXiELv2d4roHTMX32MmBWoi4q) ID: 305795002
