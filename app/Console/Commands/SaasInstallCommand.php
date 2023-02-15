@@ -188,7 +188,7 @@ class SaasInstallCommand extends Command
 
                     chdir(public_path());
                     \Illuminate\Support\Facades\File::delete(\$link);
-                    \Illuminate\Support\Facades\File::deleteDirectory(dirname(dirname($target)));
+                    \Illuminate\Support\Facades\File::deleteDirectory(dirname(dirname(\$target)));
                     return \$event->tenant;
                 })",
             ],
