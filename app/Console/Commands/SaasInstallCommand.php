@@ -80,7 +80,7 @@ class SaasInstallCommand extends Command
         $this->initTenantAdminInfo();
 
         // copy assets for AdminTenant
-        Process::run(sprintf('mkdir -p %s && cp -r %s %s', public_path('tenancy/assets/'), public_path('vendor'), public_path('tenancy/assets/')), $this->output);
+        shell_exec(sprintf('mkdir -p %s && cp -r %s %s', public_path('tenancy/assets/'), public_path('vendor'), public_path('tenancy/assets/')), $this->output);
 
         $this->initApplication();
         $this->initApplicationAppServiceProvider();
