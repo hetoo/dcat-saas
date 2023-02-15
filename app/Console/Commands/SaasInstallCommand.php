@@ -306,6 +306,7 @@ foreach (config('tenancy.central_domains', []) as \$domain) {
         'prefix'     => config('admin.route.prefix'),
         // 'namespace'  => config('admin.route.namespace'),
         'middleware' => config('admin.route.middleware'),
+        'domain' => \$domain,
     ], function (Router \$router) {
         \$router->get('/', [HomeController::class, 'index']);
     });
