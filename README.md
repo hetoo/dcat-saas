@@ -1,8 +1,7 @@
-# DcatSaas
+# DcatSaaS 一款帮助你在 30 分钟内从 0 搭建 Laravel SaaS 化项目的插件
 [![License](http://poser.pugx.org/mouyong/dcat-saas/license)](https://packagist.org/packages/mouyong/dcat-saas)
 
 ## 介绍
-一款帮助你在 30 分钟内从 0 搭建 Laravel SaaS 化项目的插件。
 
 在`插件管理器`与`应用市场管理器`的插件架构设计下，采用`Tenancy 3.x`、`Dcat-Admin`、`Laravel` 可快速建立属于你的 SaaS 业务框架。
 
@@ -29,7 +28,7 @@
 ## 安装
 1. 修改扩展包稳定性限制
 `composer.json` 需要允许安装稳定性为 `dev` 的依赖包。相关设置见下方代码。
-```
+```json
 {
     ...
     "minimum-stability": "dev",
@@ -39,25 +38,21 @@
 ```
 
 2. 初始化
-```
+```bash
 # 创建新项目 saas-test
 composer create-project --prefer-dist laravel/laravel saas-test
 # 进入项目目录
 cd saas-test
-
 # 初始化 git 仓库
 git init
 git add .
 git commit -m "feat: Init."
-
 # 配置应用市场管理器与插件管理器的安装源
 composer config repositories.market-manager vcs https://gitee.com/fresns/market-manager
 composer config repositories.plugin-manager vcs https://gitee.com/fresns/plugin-manager
-
 # 安装应用市场管理器与插件管理器
 composer require fresns/market-manager:dev-master
 composer require fresns/plugin-manager:2.x-dev
-
 # 配置数据库与项目信息
 	APP_NAME
 	APP_URL
@@ -66,23 +61,17 @@ composer require fresns/plugin-manager:2.x-dev
 	DB_DATABASE
 	DB_USERNAME
 	DB_PASSWORD
-
 # 执行迁移，增加 plugins 表
 php artisan migrate
-
 # 提交仓库变动。方便查看 saas 初始化的文件
 git add .
 git commit -m "feat: Install market-manager and plugin-manager."
-
 # 从 github 下载 dcat-saas 扩展
 php artisan market:require mouyong/dcat-saas
-
 # 或从 zip 压缩包安装 dcat-saas
 php artisan market:require ~/dcat-saas.zip
-
 # 激活插件
 php artisan plugin:activate DcatSaas
-
 # 初始化 saas 信息
 php artisan saas:install
 ```
@@ -96,11 +85,9 @@ php artisan saas:demo-add                       # 添加租户 可指定租户�
 php artisan saas:demo-del                       # 删除租户 可指定租户名，默认 foo
 php artisan saas:menu-export                    # 导出菜单（默认会尝试导出 foo 租户多菜单）
 php artisan saas:menu-reset                     # 重置菜单 (根据导出的菜单进行租户菜单重置)
-
 php artisan tenants:list                        # 查看租户列表
 php artisan tenants:migrate --tenants foo       # 执行 foo 租户的迁移，开发阶段建议指定租户，部署阶段可不指定，以批量运行租户迁移
 php artisan tenants:rollback --tenants foo      # 回滚 foo 租户的迁移，开发阶段建议指定租户，部署阶段可不指定，以批量运行租户迁移的回滚操作
-
 # 其他命令自行查看
 ...
 ```
@@ -154,3 +141,15 @@ location ~* ^/assets {
 
 ## 开发者交流群
 [技术交流群](https://qm.qq.com/cgi-bin/qm/qr?k=JdZJTPzOEsDo3gCR1ENENRXqWPmM-67l&jump_from=webapi&authKey=5EZ6xwqKptmf3U3QMT/IkclubXceZt2JWqkiQbfwXiELv2d4roHTMX32MmBWoi4q) ID: 305795002
+
+原文链接：
+- https://discuss.plugins-world.cn/post/N0q2GUrG
+- https://plugins-world.cn/laravel/case/dcat-saas.html
+
+## 效果图
+
+![DcatSaaS 一款帮助你在 30 分钟内从 0 搭建 Laravel SaaS 化项目的插件](https://cdn.learnku.com/uploads/images/202302/16/6324/JnBeTBNu64.jpg!large)
+
+![DcatSaaS 一款帮助你在 30 分钟内从 0 搭建 Laravel SaaS 化项目的插件](https://cdn.learnku.com/uploads/images/202302/16/6324/m2ar2ULu3V.jpg!large)
+
+![DcatSaaS 一款帮助你在 30 分钟内从 0 搭建 Laravel SaaS 化项目的插件](https://cdn.learnku.com/uploads/images/202302/16/6324/lAWSmbrDWR.png!large)
